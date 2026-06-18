@@ -1,0 +1,7 @@
+Manifest.toml
+test/Manifest.toml
+/tmp/
+*.tex
+*.pdf
+*.png
+.DS_Store

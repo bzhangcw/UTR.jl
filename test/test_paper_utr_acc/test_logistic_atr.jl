@@ -54,10 +54,10 @@ end
 K = 2500
 tol = 1e-9
 if bool_q_preprocessed
-    # name = "a4a"
+    name = "a4a"
     # name = "a9a"
     # name = "w4a"
-    name = "w8a"
+    # name = "w8a"
     # name = "covtype"
     # name = "news20"
     # name = "rcv1"
@@ -153,21 +153,21 @@ if bool_opt
     # supplied in the run loop below. optional `plot_k=true` adds an extra series vs the
     # outer-iteration count k (alongside the default :kH x-axis) when plotting.
     method_specs = [
-        (name="UTR (1)", method=ATR, type=1, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:direct,
-            initializerule=:given, Mₕ=Mₕ, adaptiverule=:constant, ratio_σ=2.0, ratio_Δ=15.0)),
-        (name="UTR (2)", method=ATR, type=1, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:direct,
-            initializerule=:given, Mₕ=Mₕ, adaptiverule=:constant, ratio_σ=5.0, ratio_Δ=15.0)),
-        (name="ATR", method=ATR, type=2, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:nesterov,
-            initializerule=:given, Mₕ=Mₕ, adaptiverule=:utr, ratio_σ=10.0, ratio_Δ=0.3, localthres=1e-5)),
-        (name="ATR (larger M)", method=ATR, type=2, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:nesterov,
-            initializerule=:given, Mₕ=(x) -> Mₕ(x) * 10, adaptiverule=:utr, ratio_σ=10.0, ratio_Δ=0.3, localthres=1e-5)),
-        # the accelerated UTR via the Monteiro–Svaiter inner solve
-        (name="ATR (MS)", method=ATRMS, type=3, kwargs=(; tol=tol / 2, freq=1, initializerule=:given,
-            Mₕ=(x) -> Mₕ(x) / 10, adaptiverule=:constant, localthres=1e-5)),
+        # (name="UTR (1)", method=ATR, type=1, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:direct,
+        #     initializerule=:given, Mₕ=Mₕ, adaptiverule=:constant, ratio_σ=2.0, ratio_Δ=15.0)),
+        # (name="UTR (2)", method=ATR, type=1, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:direct,
+        #     initializerule=:given, Mₕ=Mₕ, adaptiverule=:constant, ratio_σ=5.0, ratio_Δ=15.0)),
+        # (name="ATR", method=ATR, type=2, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:nesterov,
+        #     initializerule=:given, Mₕ=Mₕ, adaptiverule=:utr, ratio_σ=10.0, ratio_Δ=0.3, localthres=1e-5)),
+        # (name="ATR (larger M)", method=ATR, type=2, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:nesterov,
+        #     initializerule=:given, Mₕ=(x) -> Mₕ(x) * 10, adaptiverule=:utr, ratio_σ=10.0, ratio_Δ=0.3, localthres=1e-5)),
+        # # the accelerated UTR via the Monteiro–Svaiter inner solve
+        # (name="ATR (MS)", method=ATRMS, type=3, kwargs=(; tol=tol / 2, freq=1, initializerule=:given,
+        #     Mₕ=(x) -> Mₕ(x) / 10, adaptiverule=:constant, localthres=1e-5)),
         # the usual (large-step A-NPE) Monteiro–Svaiter accelerated method
         (name="MS", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.2, σu=0.8, λstrategy=:cold)),
-        (name="MS (warm-start)", method=MS, type=3, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.2, σu=0.8, λstrategy=:warm)),
-        (name="MS (smaller M)", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x) / 10, σl=0.2, σu=0.8, λstrategy=:cold)),
+        # (name="MS (smaller M)", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x) / 10, σl=0.2, σu=0.8, λstrategy=:cold)),
+        (name="MS (warm-start)", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.4, σu=0.6, λstrategy=:warm)),
         (name="CubicReg", method=CRM, type=1, kwargs=(; tol=tol, freq=20, subpstrategy=:direct, initializerule=:given, Mₕ=Mₕ)),
         (name="CubicReg-Acc", method=CRM, type=2, kwargs=(; tol=tol, freq=20, subpstrategy=:nesterov, initializerule=:given, Mₕ=Mₕ)),
     ]
@@ -259,14 +259,6 @@ if bool_plot
                 linewidth=2.5,
                 linestyle=:dash,
                 color=colors[k],
-            )
-            scatter!(fig,
-                xk[end:-10:1],
-                yk[end:-10:1],
-                markershape=markers[k],
-                markersize=4.0,
-                markercolor=colors[k],
-                label=nothing,
             )
         end
     end

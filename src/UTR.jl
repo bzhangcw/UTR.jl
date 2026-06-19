@@ -27,22 +27,27 @@ include("utilities/subp/cubic.jl")
 include("algorithms/interface.jl")
 include("algorithms/utr.jl")
 include("algorithms/atr.jl")
-include("algorithms/ms.jl")
+include("algorithms/atrms.jl")
 
 # vanilla cubic regularization (baseline used in the experiments)
 include("others/cubicreg_vanilla.jl")
+# vanilla Monteiro-Svaiter accelerated method
+include("others/ms.jl")
 
 # Algorithm Aliases
 # NOTE: the module itself is named `UTR`, so the universal trust-region
 # constructor is exported under its full name `UniversalTrustRegion`
 # (the `UTR` short alias would clash with the module binding).
-ATR = AcceleratedUniversalTrustRegion
+CRM = CubicRegularizationVanilla
 MS = AcceleratedMonteiroSvaiter
+ATR = AcceleratedUniversalTrustRegion
+ATRMS = AcceleratedUniversalTrustRegionMonteiroSvaiter
 
 function __init__()
 end
 
 export Result
-export UniversalTrustRegion, ATR, MS
-export CubicRegularizationVanilla
+export UniversalTrustRegion, ATR, ATRMS
+export CubicRegularizationVanilla, AcceleratedMonteiroSvaiter
+export CRM, MS
 end # module

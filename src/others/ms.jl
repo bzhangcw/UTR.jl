@@ -73,6 +73,11 @@ Base.@kwdef mutable struct MSIteration{Tx,Tf,Tϕ,Tg,TH,Th}
     λmax::Float64 = 1e12       # bracketing ceiling for λ
     expand::Float64 = 4.0      # bracketing expansion factor
     itermax::Int64 = 30        # inner (λ search) iteration cap
+    # warm-start strategy for the inner λ search (see Base.iterate):
+    #   :warm  — reuse λ from the previous iteration   (default)
+    #   :clamp — previous λ, clamped to [λmin, λmax]
+    #   :cold  — restart from the bracket midpoint (λmin + λmax) / 2
+    λstrategy::Symbol = :warm
     # ----------------------------------------------------------------
     direction = :warm
     linesearch = :none
@@ -191,13 +196,16 @@ function Base.iterate(
     # from the warm start until a bound is found, then plain-bisect once both
     # bounds exist (a valid bracket has been trapped).
     # ------------------------------------------------------------
-    # @note: on λ:
-    # 1. the most plain version, `cold-start` λ.
-    #    λ = (iter.λmin + iter.λmax) / 2
-    # 2. one can also clamp the λ.
-    #    λ = clamp(state.λ, iter.λmin, iter.λmax)
-    # 3. use the λ from the previous iteration.
-    λ = state.λ
+    # @note: warm-start for the inner λ search, selected by iter.λstrategy:
+    # 1. :cold  — the most plain version, restart from the bracket midpoint.
+    # 2. :clamp — previous λ, clamped to [λmin, λmax].
+    # 3. :warm  — use the λ from the previous iteration (default).
+    λ = begin
+        iter.λstrategy === :cold ? (iter.λmin + iter.λmax) / 2 :
+        iter.λstrategy === :clamp ? clamp(state.λ, iter.λmin, iter.λmax) :
+        iter.λstrategy === :warm ? state.λ :
+        throw(ErrorException("MS: unknown λstrategy = $(iter.λstrategy); use :warm, :clamp, or :cold"))
+    end
     λ₋, λ₊ = 0.0, 0.0
     k₂ = 0
 
@@ -373,6 +381,7 @@ function Base.show(io::IO, t::T) where {T<:MSIteration}
     @printf io "  main       strategy   := %s\n" t.mainstrategy
     @printf io "  subproblem strategy   := %s (exact regularized Newton)\n" t.subpstrategy
     @printf io "  large-step band       := [%.2f, %.2f]\n" t.σl t.σu
+    @printf io "  λ warm-start strategy := %s\n" t.λstrategy
     if t.H !== nothing
         @printf io "      second-order info := using provided Hessian matrix\n"
     else

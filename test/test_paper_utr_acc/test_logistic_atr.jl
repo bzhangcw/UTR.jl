@@ -36,8 +36,12 @@ using SparseArrays
 using .LP
 using LIBSVMFileIO
 
-bool_q_preprocessed = bool_opt = true
+bool_q_preprocessed = true
 bool_plot = true
+bool_opt = true
+# which method group to run:
+#   0 = all, 1 = unaccelerated, 2 = accelerated, 3 = MS-type
+mode_opt = 3
 f1(A, d=2) = sqrt.(sum(abs2.(A), dims=d))
 Lip2(Xv, N; dm=1.0) = begin
     λₘ = eigs(Xv' * Xv, nev=1, which=:LM, tol=1e-4)[1][]
@@ -50,10 +54,10 @@ end
 K = 2500
 tol = 1e-9
 if bool_q_preprocessed
-    name = "a4a"
+    # name = "a4a"
     # name = "a9a"
     # name = "w4a"
-    # name = "w8a"
+    name = "w8a"
     # name = "covtype"
     # name = "news20"
     # name = "rcv1"
@@ -144,119 +148,36 @@ if bool_opt
     _Mconst = Lip2(Xv, N)
     Mₕ(x) = _Mconst
 
-    # rd = ATR(name=Symbol("UTR"))(;
-    #     x0=copy(x₀), f=loss, g=g, H=H,
-    #     maxiter=K, tol=tol / 2, freq=20,
-    #     bool_trace=true,
-    #     subpstrategy=:direct,
-    #     initializerule=:given,
-    #     Mₕ=Mₕ,
-    #     adaptiverule=:constant,
-    #     ratio_σ=2.0,
-    #     ratio_Δ=15.0,
-    # )
-    # push!(results, ("UTR (1)", rd))
-    # rd = ATR(name=Symbol("UTR"))(;
-    #     x0=copy(x₀), f=loss, g=g, H=H,
-    #     maxiter=K, tol=tol / 2, freq=20,
-    #     bool_trace=true,
-    #     subpstrategy=:direct,
-    #     initializerule=:given,
-    #     Mₕ=Mₕ,
-    #     adaptiverule=:constant,
-    #     ratio_σ=5.0,
-    #     ratio_Δ=15.0,
-    # )
-    # push!(results, ("UTR (2)", rd))
+    # one named tuple per run: label, constructor, type (1=unaccel, 2=accel, 3=MS-type),
+    # and method-specific kwargs. shared kwargs (x0, f, g, H, maxiter, bool_trace) are
+    # supplied in the run loop below. optional `plot_k=true` adds an extra series vs the
+    # outer-iteration count k (alongside the default :kH x-axis) when plotting.
+    method_specs = [
+        (name="UTR (1)", method=ATR, type=1, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:direct,
+            initializerule=:given, Mₕ=Mₕ, adaptiverule=:constant, ratio_σ=2.0, ratio_Δ=15.0)),
+        (name="UTR (2)", method=ATR, type=1, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:direct,
+            initializerule=:given, Mₕ=Mₕ, adaptiverule=:constant, ratio_σ=5.0, ratio_Δ=15.0)),
+        (name="ATR", method=ATR, type=2, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:nesterov,
+            initializerule=:given, Mₕ=Mₕ, adaptiverule=:utr, ratio_σ=10.0, ratio_Δ=0.3, localthres=1e-5)),
+        (name="ATR (larger M)", method=ATR, type=2, kwargs=(; tol=tol / 2, freq=20, subpstrategy=:nesterov,
+            initializerule=:given, Mₕ=(x) -> Mₕ(x) * 10, adaptiverule=:utr, ratio_σ=10.0, ratio_Δ=0.3, localthres=1e-5)),
+        # the accelerated UTR via the Monteiro–Svaiter inner solve
+        (name="ATR (MS)", method=ATRMS, type=3, kwargs=(; tol=tol / 2, freq=1, initializerule=:given,
+            Mₕ=(x) -> Mₕ(x) / 10, adaptiverule=:constant, localthres=1e-5)),
+        # the usual (large-step A-NPE) Monteiro–Svaiter accelerated method
+        (name="MS", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.2, σu=0.8, λstrategy=:cold)),
+        (name="MS (warm-start)", method=MS, type=3, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.2, σu=0.8, λstrategy=:warm)),
+        (name="MS (smaller M)", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x) / 10, σl=0.2, σu=0.8, λstrategy=:cold)),
+        (name="CubicReg", method=CRM, type=1, kwargs=(; tol=tol, freq=20, subpstrategy=:direct, initializerule=:given, Mₕ=Mₕ)),
+        (name="CubicReg-Acc", method=CRM, type=2, kwargs=(; tol=tol, freq=20, subpstrategy=:nesterov, initializerule=:given, Mₕ=Mₕ)),
+    ]
 
-    rd = ATR(name=Symbol("ATR"))(;
-        x0=copy(x₀), f=loss, g=g, H=H,
-        maxiter=K, tol=tol / 2, freq=20,
-        bool_trace=true,
-        subpstrategy=:nesterov,
-        initializerule=:given,
-        Mₕ=Mₕ,
-        adaptiverule=:utr,
-        ratio_σ=10.0,
-        ratio_Δ=0.3,
-        localthres=1e-5
-    )
-    push!(results, ("ATR", rd))
-
-    rd = ATR(name=Symbol("ATR (larger M)"))(;
-        x0=copy(x₀), f=loss, g=g, H=H,
-        maxiter=K, tol=tol / 2, freq=20,
-        bool_trace=true,
-        subpstrategy=:nesterov,
-        initializerule=:given,
-        Mₕ=(x) -> Mₕ(x) * 10,
-        adaptiverule=:utr,
-        ratio_σ=10.0,
-        ratio_Δ=0.3,
-        localthres=1e-5
-    )
-    push!(results, ("ATR (larger M)", rd))
-
-    # rd = ATRMS(name=Symbol("ATRMS"))(;
-    #     x0=copy(x₀), f=loss, g=g, H=H,
-    #     maxiter=K, tol=tol / 2, freq=1,
-    #     bool_trace=true,
-    #     initializerule=:given,
-    #     Mₕ=(x) -> Mₕ(x) / 10,
-    #     adaptiverule=:constant,
-    #     localthres=1e-5
-    # )
-    # push!(results, ("ATR (MS)", rd))
-
-    # the usual (large-step A-NPE) Monteiro–Svaiter accelerated method
-    rd = MS(name=Symbol("MS"))(;
-        x0=copy(x₀), f=loss, g=g, H=H,
-        maxiter=K, tol=tol / 2, freq=10,
-        bool_trace=true,
-        Mₕ=(x) -> Mₕ(x),
-        σl=0.2,
-        σu=0.8,
-    )
-    push!(results, ("MS", rd))
-    rd = MS(name=Symbol("MS (larger M)"))(;
-        x0=copy(x₀), f=loss, g=g, H=H,
-        maxiter=K, tol=tol / 2, freq=10,
-        bool_trace=true,
-        Mₕ=(x) -> Mₕ(x) * 10,
-        σl=0.2,
-        σu=0.8,
-    )
-    push!(results, ("MS (larger M)", rd))
-    # rd = MS(name=Symbol("MS (smaller M)"))(;
-    #     x0=copy(x₀), f=loss, g=g, H=H,
-    #     maxiter=K, tol=tol / 2, freq=10,
-    #     bool_trace=true,
-    #     Mₕ=(x) -> Mₕ(x) / 10,
-    #     σl=0.2,
-    #     σu=0.8,
-    # )
-    # push!(results, ("MS (smaller M)", rd))
-
-    # rd = CubicRegularizationVanilla(name=Symbol("Cubic"))(;
-    #     x0=copy(x₀), f=loss, g=g, H=H,
-    #     maxiter=K, tol=tol, freq=20,
-    #     bool_trace=true,
-    #     subpstrategy=:direct,
-    #     initializerule=:given,
-    #     Mₕ=Mₕ
-    # )
-    # push!(results, ("CubicReg", rd))
-
-
-    # rd = CubicRegularizationVanilla(name=Symbol("Cubic"))(;
-    #     x0=copy(x₀), f=loss, g=g, H=H,
-    #     maxiter=K, tol=tol, freq=20,
-    #     bool_trace=true,
-    #     subpstrategy=:nesterov,
-    #     initializerule=:given,
-    #     Mₕ=Mₕ
-    # )
-    # push!(results, ("CubicReg-Acc", rd))
+    for spec in method_specs
+        (mode_opt == 0 || mode_opt == spec.type) || continue
+        rd = spec.method(name=Symbol(spec.name))(;
+            x0=copy(x₀), f=loss, g=g, H=H, maxiter=K, bool_trace=true, spec.kwargs...)
+        push!(results, (spec.name, rd, get(spec, :plot_k, false)))
+    end
 
 end
 
@@ -295,13 +216,13 @@ if bool_plot
     maxstep = K
     colors = palette(:Paired_8)[[1, 2, 3, 4, 5, 6, 7]]
     markers = [:rect, :rect, :rect, :rect, :circle, :circle, :diamond]
-    for (k, (nm, rv)) in enumerate(results)
-        yv = getresultfield(rv, metric)
+    for (k, (nm, rv, plot_k)) in enumerate(results)
+        yfull = getresultfield(rv, metric)        # full series, kept for the optional :k plot
         xv = getresultfield(rv, :kH)
-        maxlength = min(yv |> length, xv[xv.<maxstep] |> length, maxstep)
+        maxlength = min(yfull |> length, xv[xv.<maxstep] |> length, maxstep)
         indices = 1:maxlength
         # yv .- f₊ .+ 1e-20,
-        yv = yv[indices]
+        yv = yfull[indices]
         xv = xv[indices]
         @info "plotting $metric"
         @info "yv: $(yv[end])"
@@ -324,6 +245,30 @@ if bool_plot
             markercolor=colors[k],
             label=nothing,
         )
+        # optional extra series vs the outer-iteration count k (dashed, same color)
+        if plot_k
+            xk = getresultfield(rv, :k)
+            mlk = min(yfull |> length, xk[xk.<maxstep] |> length, maxstep)
+            idxk = 1:mlk
+            yk = yfull[idxk]
+            xk = xk[idxk]
+            plot!(fig,
+                xk[end:-1:1],
+                yk[end:-1:1],
+                label=L"\texttt{%$nm} ($k$)",
+                linewidth=2.5,
+                linestyle=:dash,
+                color=colors[k],
+            )
+            scatter!(fig,
+                xk[end:-10:1],
+                yk[end:-10:1],
+                markershape=markers[k],
+                markersize=4.0,
+                markercolor=colors[k],
+                label=nothing,
+            )
+        end
     end
     savefig(fig, "/tmp/e-logistic-$name-$xaxis.tex")
     savefig(fig, "/tmp/e-logistic-$name-$xaxis.pdf")

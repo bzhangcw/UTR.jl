@@ -197,81 +197,7 @@ end
 ##########################################################
 # MY VARIANTS
 ##########################################################
-# UTR.jl ships only the UTR-family methods; DRSOM2/HSODM/HaCubic wrappers below
-# are disabled (those algorithms are not part of this standalone package).
-add_drsom = false
-add_hsodm = false
 add_utr = true
-add_hacubic = false
-if add_drsom
-    alg_drsom = DRSOM2()
-    wrapper_drsom(x, loss, g, H, options; kwargs...) =
-        alg_drsom(;
-            x0=copy(x), f=loss, g=g, H=H,
-            fog=:direct,
-            sog=:hess,
-            options...
-        )
-    wrapper_drsomh(x, loss, g, H, options; kwargs...) =
-        alg_drsom(;
-            x0=copy(x), f=loss, g=g, H=H,
-            fog=:direct,
-            sog=:hess,
-            options...
-        )
-    wrapper_drsomf(x, loss, g, H, options; kwargs...) =
-        alg_drsom(;
-            x0=copy(x), f=loss,
-            fog=:forward,
-            sog=:forward,
-            options...
-        )
-    wrapper_drsomb(x, loss, g, H, options; kwargs...) =
-        alg_drsom(;
-            x0=copy(x), f=loss,
-            fog=:backward,
-            sog=:backward,
-            options...
-        )
-    wrapper_drsomd(x, loss, g, H, options; kwargs...) =
-        alg_drsom(;
-            x0=copy(x), f=loss, g=g,
-            fog=:direct,
-            sog=:prov,
-            kwargs...,
-            options...
-        )
-end
-if add_hsodm
-    alg_hsodm = HSODM()
-    wrapper_hsodm(x, loss, g, H, options; kwargs...) =
-        alg_hsodm(;
-            x0=copy(x), f=loss, g=g, H=H,
-            linesearch=:hagerzhang,
-            direction=:warm,
-            adaptive=:mishchenko,
-            options...
-        )
-    alg_hsodm_hvp = HSODM()
-    wrapper_hsodm_hvp(x, loss, g, H, options; kwargs...) =
-        alg_hsodm_hvp(;
-            x0=copy(x), f=loss, g=g,
-            linesearch=:hagerzhang,
-            direction=:auto,
-            adaptive=:mishchenko,
-            kwargs...,
-            options...
-        )
-    alg_hsodm_arc = HSODM(; name=:HSODMA)
-    wrapper_hsodm_arc(x, loss, g, H, options; kwargs...) =
-        alg_hsodm_arc(;
-            x0=copy(x), f=loss, g=g, H=H,
-            linesearch=:none,
-            direction=:warm,
-            adaptive=:arc,
-            options...
-        )
-end
 if add_utr
     alg_utr = UniversalTrustRegion(; name=:UTR)
     wrapper_utr(x, loss, g, H, options; kwargs...) =
@@ -293,28 +219,6 @@ if add_utr
             x0=copy(x), f=loss, g=g,
             subpstrategy=:lanczos,
             kwargs...,
-            options...
-        )
-end
-if add_hacubic
-    alg_hacubic_i = HaCubic()
-    wrapper_hacubic_i(x, loss, g, H, options; kwargs...) =
-        alg_hacubic_i(;
-            x0=copy(x), f=loss, g=g, H=H,
-            A₀=1e-10,
-            α=1.3,
-            memory=15,
-            memory_type=:i,
-            options...
-        )
-    alg_hacubic_ii = HaCubic()
-    wrapper_hacubic_ii(x, loss, g, H, options; kwargs...) =
-        alg_hacubic_ii(;
-            x0=copy(x), f=loss, g=g, H=H,
-            A₀=1e-10,
-            α=1.3,
-            memory=4,
-            memory_type=:ii,
             options...
         )
 end

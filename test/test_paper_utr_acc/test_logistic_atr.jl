@@ -167,7 +167,7 @@ if bool_opt
         # the usual (large-step A-NPE) Monteiro–Svaiter accelerated method
         (name="MS", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.2, σu=0.8, λstrategy=:cold)),
         # (name="MS (smaller M)", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x) / 10, σl=0.2, σu=0.8, λstrategy=:cold)),
-        (name="MS (warm-start)", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.4, σu=0.6, λstrategy=:warm)),
+        (name="MS (warm-start)", method=MS, type=3, plot_k=true, kwargs=(; tol=tol / 2, freq=10, Mₕ=(x) -> Mₕ(x), σl=0.45, σu=0.55, λstrategy=:warm)),
         (name="CubicReg", method=CRM, type=1, kwargs=(; tol=tol, freq=20, subpstrategy=:direct, initializerule=:given, Mₕ=Mₕ)),
         (name="CubicReg-Acc", method=CRM, type=2, kwargs=(; tol=tol, freq=20, subpstrategy=:nesterov, initializerule=:given, Mₕ=Mₕ)),
     ]

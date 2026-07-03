@@ -105,4 +105,5 @@ julia --project=test test/test_paper_utr_acc/test_logistic_atr_batch.jl   # ATR 
 ## Reference
 
 [1] Jiang, Y., He, C., Zhang, C. et al. Beyond Nonconvexity: A Universal Trust-Region Method with New Analyses. J Sci Comput 106, 28 (2026). [https://doi.org/10.1007/s10915-025-03154-y](https://doi.org/10.1007/s10915-025-03154-y)
+
 [2] Jiang, Y., Zhang, C., Jiang, B., Ye, Y.: Accelerating trust-region methods: an attempt to balance global and local efficiency, http://arxiv.org/abs/2511.00680, (2025)

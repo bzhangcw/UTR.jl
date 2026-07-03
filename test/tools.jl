@@ -2,7 +2,6 @@
 __precompile__()
 
 
-using AdaptiveRegularization
 using ArgParse
 using UTR
 using Dates
@@ -95,7 +94,7 @@ end
 export StateOptim, optim_to_result, arc_to_result, arc_stop_to_result
 
 add_optim = true
-add_adaptive_reg_jl = true
+add_adaptive_reg_jl = false
 if add_optim
     wrapper_gd(x, loss, g, H, options; kwargs...) =
         optim_to_result(
@@ -146,9 +145,10 @@ if add_optim
         )
 end
 if add_adaptive_reg_jl
+    import AdaptiveRegularization
     function wrapper_arc_hvp(nlp)
         reset!(nlp)
-        stats, _ = ARCqKOp(
+        stats, _ = AdaptiveRegularization.ARCqKOp(
             nlp,
             max_time=max_time,
             max_iter=max_iter,
@@ -164,7 +164,7 @@ if add_adaptive_reg_jl
 
     function wrapper_arc_hess(nlp)
         reset!(nlp)
-        stats, _ = ARCqKsparse(
+        stats, _ = AdaptiveRegularization.ARCqKsparse(
             nlp,
             max_time=max_time,
             max_iter=max_iter,
@@ -177,7 +177,7 @@ if add_adaptive_reg_jl
 
     function wrapper_tr_st(nlp)
         reset!(nlp)
-        stats, _ = ST_TROp(
+        stats, _ = AdaptiveRegularization.ST_TROp(
             nlp,
             max_time=max_time,
             max_iter=max_iter,
@@ -224,7 +224,7 @@ if add_utr
 end
 
 
-# My solvers and those in Optim.jl
+# My solvers
 MY_OPTIMIZERS = Dict(
     :UTR => wrapper_utr,
     :iUTR => wrapper_iutr,
@@ -238,9 +238,11 @@ OPTIMIZERS_OPTIM = Dict(
     :CG => wrapper_cg
 )
 
-# solvers in AdaptiveRegularization.jl 
-OPTIMIZERS_NLP = Dict(
-    :ARC => wrapper_arc_hvp, # adaptive cubic regularization (using HVP evaluation)
-    :ARCH => wrapper_arc_hess, # adaptive cubic regularization (using Hessian evaluation)
-    :TRST => wrapper_tr_st # trust-region with Steihaug–Toint CG
-)
+if add_adaptive_reg_jl
+    # solvers in AdaptiveRegularization.jl 
+    OPTIMIZERS_NLP = Dict(
+        :ARC => wrapper_arc_hvp, # adaptive cubic regularization (using HVP evaluation)
+        :ARCH => wrapper_arc_hess, # adaptive cubic regularization (using Hessian evaluation)
+        :TRST => wrapper_tr_st # trust-region with Steihaug–Toint CG
+    )
+end

@@ -41,7 +41,7 @@ if test_before_start
     ######################################################################
     # include a small test to make sure everything works
     @testset "TEST ALL DRSOM VARIANTS @ a CUTEst problem CHAINWOO" begin
-        nlp = CUTEstModel("MSQRTALS", "-param", "P=7")
+        nlp = CUTEstModel("CHAINWOO", "-param", "P=7")
         println(nlp.meta)
         name = "$(nlp.meta.name)-$(nlp.meta.nvar)"
         x0 = nlp.meta.x0

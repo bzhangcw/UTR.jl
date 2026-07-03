@@ -11,8 +11,9 @@ accelerated enhancements, originally hosted at
 | ------------------------------------------- | ----------------------------------- |
 | `UniversalTrustRegion`                      | Universal Trust-Region (UTR)        |
 | `ATR` (`= AcceleratedUniversalTrustRegion`) | Accelerated universal trust-region  |
-| `MS` (`= AcceleratedMonteiroSvaiter`)       | Monteiro–Svaiter accelerated Newton |
+| `ATRMS` (`= AcceleratedUniversalTrustRegionMonteiroSvaiter`) | Accelerated universal trust-region (Monteiro–Svaiter type) |
 | `CubicRegularizationVanilla`                | Vanilla cubic regularization        |
+<!-- | `MS` (`= AcceleratedMonteiroSvaiter`)       | Monteiro–Svaiter accelerated Newton | -->
 
 
 > **Note.** The package/module is named `UTR`, so the universal trust-region
@@ -53,7 +54,7 @@ src/
     interface.jl           # IterativeAlgorithm / Result / oracle counting
     utr.jl                 # UniversalTrustRegion
     atr.jl                 # ATR
-    ms.jl                  # MS (Monteiro–Svaiter)
+    atrms.jl               # ATRMS (Monteiro–Svaiter-type ATR)
   others/
     cubicreg_vanilla.jl    # CubicRegularizationVanilla baseline
 test/
@@ -63,8 +64,8 @@ test/
   lp.jl, tools.jl          # shared experiment helpers
   third-party/             # vendored AdaptiveRegularization.jl, LIBSVMFileIO.jl
   instances/               # LIBSVM datasets (a4a included)
-  test_paper_utr/          # paper experiment scripts (UTR vs ARC / RegNewton)
-  test_paper_utr_acc/      # accelerated-method scripts (ATR / MS)
+  test_paper_utr/          # paper experiment scripts for @reference [1]
+  test_paper_utr_acc/      # paper experiment scripts for @reference [2]
 ```
 
 
@@ -103,4 +104,5 @@ julia --project=test test/test_paper_utr_acc/test_logistic_atr_batch.jl   # ATR 
 
 ## Reference
 
-Jiang, Y., He, C., Zhang, C. et al. Beyond Nonconvexity: A Universal Trust-Region Method with New Analyses. J Sci Comput 106, 28 (2026). [https://doi.org/10.1007/s10915-025-03154-y](https://doi.org/10.1007/s10915-025-03154-y)
+[1] Jiang, Y., He, C., Zhang, C. et al. Beyond Nonconvexity: A Universal Trust-Region Method with New Analyses. J Sci Comput 106, 28 (2026). [https://doi.org/10.1007/s10915-025-03154-y](https://doi.org/10.1007/s10915-025-03154-y)
+[2] Jiang, Y., Zhang, C., Jiang, B., Ye, Y.: Accelerating trust-region methods: an attempt to balance global and local efficiency, http://arxiv.org/abs/2511.00680, (2025)

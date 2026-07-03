@@ -18,7 +18,6 @@ include("../tools.jl")
 
 using ArgParse
 using Arpack
-using DRSOM
 using LineSearches
 using Optim
 using ProximalOperators
@@ -27,7 +26,6 @@ using Random
 using Plots
 using Printf
 using KrylovKit
-using ADNLPModels
 using LaTeXStrings
 using LinearAlgebra
 using Statistics
@@ -123,7 +121,6 @@ for name in ["a4a", "a9a", "w4a", "w8a"]
         show_every=1,
         time_limit=500
     )
-    nlp = ADNLPModel(x -> loss(x), copy(x₀))
 
 
 

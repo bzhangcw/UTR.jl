@@ -5,3 +5,4 @@ test/Manifest.toml
 *.pdf
 *.png
 .DS_Store
+test_myself

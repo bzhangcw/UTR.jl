@@ -6,16 +6,20 @@ accelerated enhancements, originally hosted at
 
 ## Algorithms
 
-| Exported name                                   | Method                              |
-| ----------------------------------------------- | ----------------------------------- |
-| `UniversalTrustRegion`                          | Universal Trust-Region (UTR)        |
-| `ATR` (`= AcceleratedUniversalTrustRegion`)     | Accelerated universal trust-region  |
-| `MS`  (`= AcceleratedMonteiroSvaiter`)          | Monteiro–Svaiter accelerated Newton |
-| `CubicRegularizationVanilla`                    | Vanilla cubic regularization        |
+
+| Exported name                               | Method                              |
+| ------------------------------------------- | ----------------------------------- |
+| `UniversalTrustRegion`                      | Universal Trust-Region (UTR)        |
+| `ATR` (`= AcceleratedUniversalTrustRegion`) | Accelerated universal trust-region  |
+| `MS` (`= AcceleratedMonteiroSvaiter`)       | Monteiro–Svaiter accelerated Newton |
+| `CubicRegularizationVanilla`                | Vanilla cubic regularization        |
+
 
 > **Note.** The package/module is named `UTR`, so the universal trust-region
 > constructor is exported under its full name `UniversalTrustRegion` (a `UTR`
 > binding would clash with the module name).
+
+
 
 ## Usage
 
@@ -35,6 +39,8 @@ r = UniversalTrustRegion(name=:UTR)(;
 r.state.x      # solution
 r.trajectory   # per-iteration states (when bool_trace=true)
 ```
+
+
 
 ## Layout
 
@@ -61,6 +67,8 @@ test/
   test_paper_utr_acc/      # accelerated-method scripts (ATR / MS)
 ```
 
+
+
 ## Running the experiments
 
 The `test/` directory has its own environment that pulls in the heavy
@@ -77,9 +85,10 @@ Then run a paper script from the repo root (so relative data paths resolve):
 
 ```bash
 julia --project=test test/test_paper_utr/test_logistic.jl
-julia --project=test test/test_paper_utr/test_soft_maximum.jl
-julia --project=test test/test_paper_utr_acc/test_logistic_atr.jl   # ATR / MS comparison
+julia --project=test test/test_paper_utr_acc/test_logistic_atr_batch.jl   # ATR / MS comparison
 ```
+
+
 
 ## License
 
@@ -87,9 +96,11 @@ julia --project=test test/test_paper_utr_acc/test_logistic_atr.jl   # ATR / MS c
 
 ## Developers
 
-- Yuntian Jiang <yuntianjiang07@gmail.com>
-- Chuwen Zhang <chuwzhang@gmail.com>
+- Yuntian Jiang [yuntianjiang07@gmail.com](mailto:yuntianjiang07@gmail.com)
+- Chuwen Zhang [chuwzhang@gmail.com](mailto:chuwzhang@gmail.com)
+
 
 
 ## Reference
-Jiang, Y., He, C., Zhang, C. et al. Beyond Nonconvexity: A Universal Trust-Region Method with New Analyses. J Sci Comput 106, 28 (2026). https://doi.org/10.1007/s10915-025-03154-y
+
+Jiang, Y., He, C., Zhang, C. et al. Beyond Nonconvexity: A Universal Trust-Region Method with New Analyses. J Sci Comput 106, 28 (2026). [https://doi.org/10.1007/s10915-025-03154-y](https://doi.org/10.1007/s10915-025-03154-y)

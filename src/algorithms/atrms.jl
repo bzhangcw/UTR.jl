@@ -34,7 +34,7 @@ Base.@kwdef mutable struct ATRMSIteration{Tx,Tf,Tϕ,Tg,TH,Th}
     G₀::Float64 = 1e2
     η::Float64 = 0.3
     γ::Float64 = 0.98
-    ψ::Float64 = 1.3
+    ψ::Float64 = 1.02
     localthres::Float64 = 1e-8
     # ----------------------------------------------------------------
     itermax::Int64 = 20

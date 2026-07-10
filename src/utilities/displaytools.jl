@@ -12,8 +12,8 @@ default_stopping_criterion(tol, state::Any) = norm(state.res, Inf) <= tol
 
 # formatter
 const HEADER = [
-    "DRSOM.jl: A Package for Second-Order Methods",
-    "(c) Chuwen Zhang, Yinyu Ye (2022)",
+    "UTR.jl: A Package for Universal Trust Region Methods",
+    "(c) Chuwen Zhang, Yuntian Jiang (2024)",
 ]
 
 function format_header(log)
